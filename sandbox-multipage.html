@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sticker Visa Auto-Filler — Multi-Page Google-Forms Sandbox</title>
+  <style>
+    body { font-family: 'Google Sans', Roboto, system-ui, sans-serif; max-width: 720px; margin: 24px auto; padding: 0 16px; color: #202124; background: #f0ebf8; }
+    .form-card { background: #fff; border: 1px solid #dadce0; border-radius: 8px; padding: 24px; margin-bottom: 12px; }
+    h1 { font-size: 24px; margin: 0 0 8px; }
+    p.lead { color: #5f6368; font-size: 13px; margin-top: 0; }
+    .page-indicator { font-size: 12px; color: #5f6368; margin-top: 12px; }
+    [role="listitem"] { padding: 12px 0; }
+    [role="heading"] { font-size: 14px; color: #202124; margin-bottom: 8px; font-weight: 400; }
+    .required { color: #d93025; }
+    .out-of-scope { font-size: 11px; color: #b45309; background: #fef3c7; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 500; }
+    .supported { font-size: 11px; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 500; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"], select {
+      width: 100%; padding: 6px 0; border: 0; border-bottom: 1px solid #dadce0;
+      font-size: 14px; background: transparent; outline: none; font-family: inherit;
+    }
+    select { padding: 6px 4px; }
+    input:focus, [contenteditable]:focus { border-bottom: 2px solid #673ab7; }
+    [contenteditable] {
+      min-height: 24px; padding: 6px 0; border-bottom: 1px solid #dadce0; font-size: 14px; outline: none;
+    }
+    .radio-group, .checkbox-group { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
+    .radio-group label, .checkbox-group label { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #202124; cursor: pointer; }
+    .radio-group input, .checkbox-group input { margin: 0; accent-color: #673ab7; }
+    .phone-row { display: flex; align-items: flex-end; gap: 8px; }
+    .phone-prefix { padding: 6px 0; font-size: 14px; color: #5f6368; border-bottom: 1px solid #dadce0; }
+    .nav-row { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 16px; border-top: 1px solid #dadce0; }
+    button { padding: 10px 24px; border: 0; border-radius: 4px; background: #673ab7; color: #fff; font-size: 14px; cursor: pointer; font-family: inherit; }
+    button.secondary { background: transparent; color: #673ab7; }
+    button:disabled { color: #bdbdbd; background: transparent; cursor: not-allowed; }
+    section[hidden] { display: none; }
+    #log { background: #202124; color: #e8eaed; font-family: ui-monospace, monospace; font-size: 12px; padding: 12px; border-radius: 8px; min-height: 60px; white-space: pre-wrap; max-height: 420px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="form-card">
+    <h1>Visa Application — Multi-Section</h1>
+    <p class="lead">
+      Mimics a real multi-section Google Form: each question lives in a <code>div[role="listitem"]</code> with the prompt in a sibling <code>div[role="heading"]</code>.
+      Inputs carry no <code>id</code>, <code>name</code>, or <code>placeholder</code> — the auto-filler must resolve labels via <code>aria-labelledby</code>, <code>aria-label</code>, or the heading-walk fallback.
+      All 25 questions across 3 pages stay in the DOM, so one autofill click fills every matching field at once. A hidden CSRF token at the bottom verifies the EC-01 guardrail still holds.
+    </p>
+    <div class="page-indicator" id="page-indicator">Section 1 of 3</div>
+  </div>
+
+  <form class="form-card" id="visa-form" autocomplete="off">
+
+    <!-- ============== PAGE 1 — 5 fields ============== -->
+    <section data-page="1">
+      <div role="listitem">
+        <div role="heading" id="q-passport">Passport Number <span class="required">*</span></div>
+        <input type="text" aria-labelledby="q-passport">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Family Name (Surname)</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Given Name</div>
+        <input type="text" aria-label="Given Name">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Date of Birth</div>
+        <input type="date">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Nationality</div>
+        <div role="textbox" contenteditable="true"></div>
+      </div>
+    </section>
+
+    <!-- ============== PAGE 2 — 10 fields ============== -->
+    <section data-page="2" hidden>
+      <div role="listitem">
+        <div role="heading">Email Address</div>
+        <input type="email" aria-label="Email Address">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Mobile Number</div>
+        <div class="phone-row">
+          <span class="phone-prefix">+88</span>
+          <input type="tel" aria-label="Mobile Number" value="+88">
+        </div>
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Gender <span class="supported">radio ✓</span></div>
+        <div class="radio-group" role="radiogroup" aria-label="Gender">
+          <label><input type="radio" name="gender" value="male"> Male</label>
+          <label><input type="radio" name="gender" value="female"> Female</label>
+          <label><input type="radio" name="gender" value="other"> Other</label>
+        </div>
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Marital Status <span class="supported">dropdown ✓</span></div>
+        <select aria-label="Marital Status">
+          <option value="">Choose...</option>
+          <option value="single">Single</option>
+          <option value="married">Married</option>
+          <option value="divorced">Divorced</option>
+          <option value="widowed">Widowed</option>
+        </select>
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Address Line 1</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">City</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">State / Province</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Postal Code</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Country of Residence</div>
+        <div role="textbox" contenteditable="true"></div>
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Occupation</div>
+        <input type="text">
+      </div>
+    </section>
+
+    <!-- ============== PAGE 3 — 10 fields ============== -->
+    <section data-page="3" hidden>
+      <div role="listitem">
+        <div role="heading">Visa Type <span class="supported">radio ✓</span></div>
+        <div class="radio-group" role="radiogroup" aria-label="Visa Type">
+          <label><input type="radio" name="visa_type" value="tourist"> Tourist</label>
+          <label><input type="radio" name="visa_type" value="business"> Business</label>
+          <label><input type="radio" name="visa_type" value="student"> Student</label>
+          <label><input type="radio" name="visa_type" value="work"> Work</label>
+        </div>
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Travel Date</div>
+        <input type="date">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Length of Stay (days)</div>
+        <input type="number" min="1">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Purpose of Visit</div>
+        <div role="textbox" contenteditable="true"></div>
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Hotel Name</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Hotel Address</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Sponsor Name</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Sponsor Email</div>
+        <input type="email">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Emergency Contact</div>
+        <input type="text">
+      </div>
+
+      <div role="listitem">
+        <div role="heading">Skills / Languages <span class="supported">checkbox · multi-select ✓</span></div>
+        <div class="checkbox-group" role="group" aria-label="Skills">
+          <label><input type="checkbox" name="skills" value="english"> English</label>
+          <label><input type="checkbox" name="skills" value="bangla"> Bangla</label>
+          <label><input type="checkbox" name="skills" value="hindi"> Hindi</label>
+          <label><input type="checkbox" name="skills" value="arabic"> Arabic</label>
+          <label><input type="checkbox" name="skills" value="french"> French</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- EC-01: hidden CSRF token must remain untouched. -->
+    <input type="hidden" id="csrf_token" name="csrf_token" value="DO_NOT_OVERWRITE_ME">
+
+    <div class="nav-row">
+      <button type="button" id="back-btn" class="secondary" disabled>Back</button>
+      <div>
+        <button type="button" id="dump-btn" class="secondary">Dump Values</button>
+        <button type="button" id="next-btn">Next</button>
+      </div>
+    </div>
+  </form>
+
+  <h2 style="font-size:13px;margin: 20px 0 8px;">Form state</h2>
+  <pre id="log">(navigate through all 3 sections, then click "Dump Values" to verify state across every question)</pre>
+
+  <script>
+    // Multi-section navigation — every question stays in the DOM (display:none toggled),
+    // so the auto-filler fills all 3 pages in a single pass.
+    const sections = document.querySelectorAll('section[data-page]');
+    const backBtn = document.getElementById('back-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const indicator = document.getElementById('page-indicator');
+    let currentPage = 1;
+    const totalPages = sections.length;
+
+    function showPage(n) {
+      currentPage = n;
+      sections.forEach((s) => s.hidden = Number(s.getAttribute('data-page')) !== n);
+      indicator.textContent = `Section ${n} of ${totalPages}`;
+      backBtn.disabled = n === 1;
+      nextBtn.textContent = n === totalPages ? 'Submit' : 'Next';
+      window.scrollTo(0, 0);
+    }
+    backBtn.addEventListener('click', () => showPage(Math.max(1, currentPage - 1)));
+    nextBtn.addEventListener('click', () => showPage(Math.min(totalPages, currentPage + 1)));
+
+    // Dump every question across all pages — handles inputs, contenteditable, radios, and checkboxes.
+    document.getElementById('dump-btn').addEventListener('click', () => {
+      const data = {};
+      const seenGroups = new Set();
+      document.querySelectorAll('[role="listitem"]').forEach((item) => {
+        const headingEl = item.querySelector('[role="heading"]');
+        let heading = '(unlabeled)';
+        if (headingEl) {
+          const clone = headingEl.cloneNode(true);
+          clone.querySelectorAll('.required, .supported, .out-of-scope').forEach((n) => n.remove());
+          heading = clone.textContent.trim();
+        }
+        const radio = item.querySelector('input[type="radio"]');
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        const editable = item.querySelector('[contenteditable]');
+        const selectEl = item.querySelector('select');
+        const textish = item.querySelector('input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"]');
+
+        if (radio) {
+          if (seenGroups.has(radio.name)) return;
+          seenGroups.add(radio.name);
+          const checked = item.querySelector('input[type="radio"]:checked');
+          data[heading] = checked ? checked.value : '(none selected)';
+        } else if (checkbox) {
+          if (seenGroups.has(checkbox.name)) return;
+          seenGroups.add(checkbox.name);
+          const checkedVals = Array.from(item.querySelectorAll('input[type="checkbox"]:checked')).map((c) => c.value);
+          data[heading] = checkedVals.length ? checkedVals : '(none selected)';
+        } else if (selectEl) {
+          data[heading] = selectEl.value || '(none selected)';
+        } else if (editable) {
+          data[heading] = editable.textContent;
+        } else if (textish) {
+          data[heading] = textish.value;
+        }
+      });
+      data['csrf_token (hidden)'] = document.getElementById('csrf_token').value;
+      document.getElementById('log').textContent = JSON.stringify(data, null, 2);
+    });
+
+    showPage(1);
+  </script>
+</body>
+</html>

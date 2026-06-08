@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sticker Visa · Client Database Admin</title>
+  <style>
+    :root {
+      --bd:#e2e8f0; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b; --soft:#94a3b8;
+      --brand:#4f46e5; --brand-d:#4338ca; --red:#dc2626; --green:#16a34a; --amber:#b45309;
+      --shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.06);
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; margin: 0; padding-bottom: 64px; color: var(--ink); background: var(--bg); }
+    header { background: linear-gradient(120deg, #1e1b4b, #4f46e5); color: #eef2ff; padding: 22px 24px; }
+    header .wrap { max-width: 1180px; margin: 0 auto; }
+    header h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; }
+    header p { font-size: 13px; margin: 6px 0 0; color: #c7d2fe; }
+    main { max-width: 1180px; margin: -28px auto 0; padding: 0 24px; }
+    .card { background: #fff; border: 1px solid var(--bd); border-radius: 14px; padding: 20px; margin-bottom: 18px; box-shadow: var(--shadow); }
+    .card h2 { font-size: 14px; margin: 0 0 14px; letter-spacing: .02em; text-transform: uppercase; color: #475569; }
+    .group-title { font-size: 12px; font-weight: 600; color: var(--brand); margin: 16px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--bd); }
+    .group-title:first-of-type { margin-top: 0; }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 8px 0 3px; }
+    input, select { width: 100%; padding: 8px 10px; border: 1px solid var(--bd); border-radius: 8px; font-size: 13px; background: #fff; transition: border-color .12s, box-shadow .12s; }
+    input:focus, select:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 16px; }
+    .conn-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 12px; align-items: end; }
+    button { padding: 9px 16px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--brand); color: #fff; transition: filter .12s, background .12s; }
+    button:hover { filter: brightness(1.06); }
+    button:active { filter: brightness(.96); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    button.secondary { background: #eef2f7; color: var(--ink); }
+    button.danger { background: #fef2f2; color: var(--red); }
+    button.danger:hover { background: var(--red); color: #fff; }
+    button.small { padding: 5px 11px; font-size: 12px; }
+    .actions { display: flex; gap: 10px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
+    .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .toolbar input[type="search"] { max-width: 280px; }
+    .status { font-size: 12px; color: var(--muted); min-height: 16px; }
+    .status.ok { color: var(--green); } .status.err { color: var(--red); }
+    .note { font-size: 12px; color: #713f12; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; margin-top: 12px; line-height: 1.5; }
+    .note code { background: #fff7ed; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+    .table-wrap { overflow: auto; border: 1px solid var(--bd); border-radius: 10px; max-height: 60vh; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; white-space: nowrap; }
+    th, td { padding: 8px 11px; border-bottom: 1px solid #eef2f6; text-align: left; }
+    th { background: #f1f5f9; position: sticky; top: 0; font-weight: 600; color: #475569; z-index: 1; }
+    tbody tr:nth-child(even) td { background: #fbfcfe; }
+    tbody tr:hover td { background: #eef2ff; }
+    td.cell { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+    .row-actions { display: flex; gap: 6px; }
+    .count { font-size: 12px; color: var(--muted); margin-left: auto; font-weight: 400; text-transform: none; letter-spacing: 0; }
+    .editing-banner { display: none; background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; font-size: 12px; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; }
+    .editing-banner.on { display: block; }
+    .pill { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: #eef2ff; color: var(--brand); }
+    .empty { padding: 28px; text-align: center; color: var(--soft); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Sticker Visa · Client Database Admin</h1>
+      <p>View and manage the Supabase <code style="color:#e0e7ff">clients</code> table — no SQL required. Local-only utility, not part of the shipped extension.</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- Connection -->
+    <section class="card">
+      <h2>Connection</h2>
+      <div class="conn-row">
+        <div>
+          <label for="url">Supabase URL</label>
+          <input id="url" type="text" placeholder="https://YOUR-REF.supabase.co">
+        </div>
+        <div>
+          <label for="key">API key <span style="color:var(--soft)">(anon, baked in — swap for service_role if needed)</span></label>
+          <input id="key" type="password" placeholder="anon or service_role key">
+        </div>
+        <div><button id="connect-btn">Connect &amp; Load</button></div>
+      </div>
+      <div class="status" id="conn-status" style="margin-top:12px;"></div>
+      <div class="note">
+        The bundled <b>anon</b> key has read + write access here (an anon write policy is enabled on the table). If you tighten RLS later, writes will return HTTP&nbsp;401/403 — swap in your
+        <b>service_role</b> key (Supabase → Settings → API), kept on this machine only.
+      </div>
+    </section>
+
+    <!-- Add / Edit -->
+    <section class="card">
+      <h2 id="form-title">Add a client</h2>
+      <div class="editing-banner" id="editing-banner"></div>
+      <form id="client-form"><div id="form-groups"><!-- grouped fields injected --></div>
+        <div class="actions">
+          <button type="submit" id="save-btn">Insert client</button>
+          <button type="button" class="secondary" id="reset-btn">Clear form</button>
+          <span class="status" id="form-status"></span>
+        </div>
+      </form>
+    </section>
+
+    <!-- View -->
+    <section class="card">
+      <h2 style="display:flex; align-items:center;">Clients <span class="count" id="count"></span></h2>
+      <div class="toolbar">
+        <button class="secondary small" id="refresh-btn">↻ Refresh</button>
+        <button class="secondary small" id="export-btn">⭳ Export CSV</button>
+        <input type="search" id="search" placeholder="Filter rows (name, passport, email…)">
+        <span class="status" id="view-status"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="table"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ---- Field schema — mirrors content.js FIELD_MAP, mock_clients.js & the clients table ----
+    const FIELDS = [
+      { key: 'passport_number', label: 'Passport Number', type: 'text', required: true, group: 'Identity' },
+      { key: 'surname', label: 'Surname', type: 'text', required: true, group: 'Identity' },
+      { key: 'given_name', label: 'Given Name', type: 'text', required: true, group: 'Identity' },
+      { key: 'dob', label: 'Date of Birth', type: 'date', group: 'Identity' },
+      { key: 'nationality', label: 'Nationality', type: 'text', group: 'Identity' },
+      { key: 'email', label: 'Email', type: 'email', group: 'Contact & Demographics' },
+      { key: 'phone', label: 'Phone', type: 'text', group: 'Contact & Demographics' },
+      { key: 'gender', label: 'Gender', type: 'select', options: ['', 'male', 'female', 'other'], group: 'Contact & Demographics' },
+      { key: 'marital_status', label: 'Marital Status', type: 'select', options: ['', 'single', 'married', 'divorced', 'widowed'], group: 'Contact & Demographics' },
+      { key: 'address_line_1', label: 'Address Line 1', type: 'text', group: 'Contact & Demographics' },
+      { key: 'city', label: 'City', type: 'text', group: 'Contact & Demographics' },
+      { key: 'state', label: 'State / Province', type: 'text', group: 'Contact & Demographics' },
+      { key: 'postal_code', label: 'Postal Code', type: 'text', group: 'Contact & Demographics' },
+      { key: 'country_of_residence', label: 'Country of Residence', type: 'text', group: 'Contact & Demographics' },
+      { key: 'occupation', label: 'Occupation', type: 'text', group: 'Contact & Demographics' },
+      { key: 'visa_type', label: 'Visa Type', type: 'select', options: ['', 'tourist', 'business', 'student', 'work'], group: 'Travel' },
+      { key: 'travel_date', label: 'Travel Date', type: 'date', group: 'Travel' },
+      { key: 'length_of_stay', label: 'Length of Stay (days)', type: 'number', group: 'Travel' },
+      { key: 'purpose_of_visit', label: 'Purpose of Visit', type: 'text', group: 'Travel' },
+      { key: 'hotel_name', label: 'Hotel Name', type: 'text', group: 'Travel' },
+      { key: 'hotel_address', label: 'Hotel Address', type: 'text', group: 'Travel' },
+      { key: 'sponsor_name', label: 'Sponsor Name', type: 'text', group: 'Travel' },
+      { key: 'sponsor_email', label: 'Sponsor Email', type: 'email', group: 'Travel' },
+      { key: 'emergency_contact', label: 'Emergency Contact', type: 'text', group: 'Travel' },
+      { key: 'skills', label: 'Skills / Languages (comma-separated)', type: 'text', isArray: true, group: 'Travel' },
+    ];
+    const GROUPS = ['Identity', 'Contact & Demographics', 'Travel'];
+    const TABLE = 'clients';
+    const DEFAULT_URL = 'https://gskjkbwintjsilaytpss.supabase.co';
+    // Anon key baked in for convenience (already public in config.js). Works for
+    // read + write because an anon write policy is enabled on the clients table.
+    const DEFAULT_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdza2prYndpbnRqc2lsYXl0cHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjc0NjIsImV4cCI6MjA5NDcwMzQ2Mn0.6LLt0oL1jBPT8zsRl8q0IzvZYS7SFDaoH9ed8uw9QOo';
+
+    const $ = (id) => document.getElementById(id);
+    let editingId = null;
+    let allRows = [];
+
+    // ---- Credentials (persisted in localStorage) ----
+    function loadCreds() {
+      $('url').value = localStorage.getItem('sva_admin_url') || DEFAULT_URL;
+      $('key').value = localStorage.getItem('sva_admin_key') || DEFAULT_KEY;
+    }
+    function creds() { return { url: $('url').value.trim().replace(/\/+$/, ''), key: $('key').value.trim() }; }
+    function saveCreds() { const { url, key } = creds(); localStorage.setItem('sva_admin_url', url); localStorage.setItem('sva_admin_key', key); }
+    function headers(extra) { const { key } = creds(); return Object.assign({ apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, extra || {}); }
+    function ready() { const { url, key } = creds(); return url && key; }
+
+    // ---- Build the grouped form ----
+    function buildForm() {
+      const host = $('form-groups');
+      host.innerHTML = '';
+      for (const g of GROUPS) {
+        const title = document.createElement('div');
+        title.className = 'group-title';
+        title.textContent = g;
+        host.appendChild(title);
+
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        for (const f of FIELDS.filter((x) => x.group === g)) {
+          const wrap = document.createElement('div');
+          const label = document.createElement('label');
+          label.textContent = f.label + (f.required ? ' *' : '');
+          label.setAttribute('for', `f_${f.key}`);
+          wrap.appendChild(label);
+
+          let el;
+          if (f.type === 'select') {
+            el = document.createElement('select');
+            for (const opt of f.options) {
+              const o = document.createElement('option');
+              o.value = opt; o.textContent = opt === '' ? '—' : opt;
+              el.appendChild(o);
+            }
+          } else {
+            el = document.createElement('input');
+            el.type = f.type === 'number' ? 'number' : (f.type === 'date' ? 'date' : (f.type === 'email' ? 'email' : 'text'));
+          }
+          el.id = `f_${f.key}`;
+          wrap.appendChild(el);
+          grid.appendChild(wrap);
+        }
+        host.appendChild(grid);
+      }
+    }
+
+    // ---- Form <-> payload ----
+    function readForm() {
+      const payload = {};
+      for (const f of FIELDS) {
+        const raw = $(`f_${f.key}`).value;
+        const v = typeof raw === 'string' ? raw.trim() : raw;
+        if (v === '' || v == null) continue; // omit empty → avoids "" into date/int columns
+        if (f.isArray) { const arr = v.split(',').map((s) => s.trim()).filter(Boolean); if (arr.length) payload[f.key] = arr; }
+        else if (f.type === 'number') { const n = Number(v); if (!Number.isNaN(n)) payload[f.key] = n; }
+        else payload[f.key] = v;
+      }
+      return payload;
+    }
+    function fillForm(row) {
+      for (const f of FIELDS) {
+        let v = row[f.key];
+        if (v == null) v = '';
+        else if (f.isArray && Array.isArray(v)) v = v.join(', ');
+        $(`f_${f.key}`).value = v;
+      }
+    }
+    function resetForm() {
+      editingId = null;
+      $('client-form').reset();
+      $('form-title').textContent = 'Add a client';
+      $('save-btn').textContent = 'Insert client';
+      $('editing-banner').classList.remove('on');
+      setForm('', '');
+    }
+
+    // ---- API (PostgREST) ----
+    async function apiGet() {
+      const { url } = creds();
+      const res = await fetch(`${url}/rest/v1/${TABLE}?select=*&order=id.asc`, { headers: headers() });
+      if (!res.ok) throw new Error(`HTTP ${res.status} — ${await res.text()}`);
+      return res.json();
+    }
+    async function apiInsert(payload) {
+      const { url } = creds();
+      const res = await fetch(`${url}/rest/v1/${TABLE}`, { method: 'POST', headers: headers({ Prefer: 'return=representation' }), body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`HTTP ${res.status} — ${await res.text()}`);
+      return res.json();
+    }
+    async function apiUpdate(id, payload) {
+      const { url } = creds();
+      const res = await fetch(`${url}/rest/v1/${TABLE}?id=eq.${id}`, { method: 'PATCH', headers: headers({ Prefer: 'return=representation' }), body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`HTTP ${res.status} — ${await res.text()}`);
+      return res.json();
+    }
+    async function apiDelete(id) {
+      const { url } = creds();
+      const res = await fetch(`${url}/rest/v1/${TABLE}?id=eq.${id}`, { method: 'DELETE', headers: headers() });
+      if (!res.ok) throw new Error(`HTTP ${res.status} — ${await res.text()}`);
+    }
+
+    // ---- Render ----
+    const VIEW_COLS = ['id', ...FIELDS.map((f) => f.key), 'created_at'];
+
+    function render(rows) {
+      const thead = $('thead'), tbody = $('tbody');
+      thead.innerHTML = ''; tbody.innerHTML = '';
+
+      const htr = document.createElement('tr');
+      for (const c of VIEW_COLS) { const th = document.createElement('th'); th.textContent = c; htr.appendChild(th); }
+      const thAct = document.createElement('th'); thAct.textContent = 'actions'; htr.appendChild(thAct);
+      thead.appendChild(htr);
+
+      if (!rows.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = VIEW_COLS.length + 1;
+        td.className = 'empty';
+        td.textContent = allRows.length ? 'No rows match your filter.' : 'No clients yet — add one above.';
+        tr.appendChild(td); tbody.appendChild(tr);
+        return;
+      }
+
+      for (const row of rows) {
+        const tr = document.createElement('tr');
+        for (const c of VIEW_COLS) {
+          const td = document.createElement('td');
+          td.className = 'cell';
+          let v = row[c];
+          if (Array.isArray(v)) v = v.join(', ');
+          td.textContent = v == null ? '' : String(v);
+          td.title = td.textContent;
+          tr.appendChild(td);
+        }
+        const tdAct = document.createElement('td');
+        tdAct.className = 'row-actions';
+        const edit = document.createElement('button'); edit.className = 'secondary small'; edit.textContent = 'Edit'; edit.onclick = () => startEdit(row);
+        const del = document.createElement('button'); del.className = 'danger small'; del.textContent = 'Delete'; del.onclick = () => removeRow(row);
+        tdAct.append(edit, del); tr.appendChild(tdAct);
+        tbody.appendChild(tr);
+      }
+    }
+
+    function applyFilter() {
+      const q = $('search').value.trim().toLowerCase();
+      const rows = !q ? allRows : allRows.filter((r) =>
+        VIEW_COLS.some((c) => { let v = r[c]; if (Array.isArray(v)) v = v.join(' '); return String(v ?? '').toLowerCase().includes(q); }));
+      render(rows);
+      $('count').textContent = q ? `${rows.length} of ${allRows.length}` : `${allRows.length} client(s)`;
+    }
+
+    function startEdit(row) {
+      editingId = row.id;
+      fillForm(row);
+      $('form-title').textContent = `Edit client #${row.id}`;
+      $('save-btn').textContent = 'Update client';
+      const b = $('editing-banner');
+      b.textContent = `Editing #${row.id} — ${row.surname || ''}, ${row.given_name || ''}. "Update client" saves, "Clear form" cancels.`;
+      b.classList.add('on');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    async function removeRow(row) {
+      if (!confirm(`Delete client #${row.id} (${row.surname || ''}, ${row.given_name || ''})? This cannot be undone.`)) return;
+      try { await apiDelete(row.id); setView(`Deleted #${row.id}.`, 'ok'); await refresh(); }
+      catch (e) { setView(writeHint(e.message), 'err'); }
+    }
+
+    function exportCsv() {
+      if (!allRows.length) { setView('Nothing to export.', 'err'); return; }
+      const esc = (v) => { let s = Array.isArray(v) ? v.join('; ') : (v == null ? '' : String(v)); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+      const lines = [VIEW_COLS.join(',')].concat(allRows.map((r) => VIEW_COLS.map((c) => esc(r[c])).join(',')));
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `clients-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click(); URL.revokeObjectURL(a.href);
+    }
+
+    // ---- Status helpers ----
+    function setConn(m, c) { const e = $('conn-status'); e.textContent = m; e.className = 'status ' + (c || ''); }
+    function setForm(m, c) { const e = $('form-status'); e.textContent = m; e.className = 'status ' + (c || ''); }
+    function setView(m, c) { const e = $('view-status'); e.textContent = m; e.className = 'status ' + (c || ''); }
+    function writeHint(msg) {
+      return /401|403|permission|policy|rls/i.test(msg)
+        ? `Write rejected — key is read-only. Use the service_role key or enable an anon write policy. (${msg})`
+        : msg;
+    }
+
+    // ---- Wire up ----
+    async function refresh() {
+      if (!ready()) { setView('Enter URL + key, then Connect.', 'err'); return; }
+      setView('Loading…');
+      try { allRows = await apiGet(); applyFilter(); setView('Loaded.', 'ok'); }
+      catch (e) { setView(e.message, 'err'); }
+    }
+
+    $('connect-btn').addEventListener('click', async () => {
+      if (!ready()) { setConn('Enter both the URL and a key.', 'err'); return; }
+      saveCreds(); setConn('Connecting…');
+      try { allRows = await apiGet(); applyFilter(); setConn(`Connected — ${allRows.length} client(s) loaded.`, 'ok'); setView('Loaded.', 'ok'); }
+      catch (e) { setConn(e.message, 'err'); }
+    });
+    $('refresh-btn').addEventListener('click', refresh);
+    $('reset-btn').addEventListener('click', resetForm);
+    $('export-btn').addEventListener('click', exportCsv);
+    $('search').addEventListener('input', applyFilter);
+
+    $('client-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!ready()) { setForm('Connect first (URL + key).', 'err'); return; }
+      const payload = readForm();
+      if (!payload.passport_number || !payload.surname || !payload.given_name) { setForm('Passport number, surname, and given name are required.', 'err'); return; }
+      saveCreds(); $('save-btn').disabled = true;
+      try {
+        if (editingId != null) { await apiUpdate(editingId, payload); setForm(`Updated client #${editingId}.`, 'ok'); }
+        else { const [created] = await apiInsert(payload); setForm(`Inserted client #${created?.id ?? '?'}.`, 'ok'); }
+        resetForm(); await refresh();
+      } catch (err) { setForm(writeHint(err.message), 'err'); }
+      finally { $('save-btn').disabled = false; }
+    });
+
+    // ---- Init ----
+    buildForm();
+    loadCreds();
+    if (ready()) $('connect-btn').click();
+  </script>
+</body>
+</html>

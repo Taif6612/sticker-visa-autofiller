@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sticker Visa Auto-Filler</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; width: 320px; margin: 0; padding: 12px; }
+    h1 { font-size: 14px; margin: 0 0 10px; color: #1e293b; }
+    label { display: block; font-size: 12px; color: #475569; margin: 8px 0 4px; }
+    input[type="search"] { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: #fff; box-sizing: border-box; }
+    input[type="search"]:focus { outline: none; border-color: #2563eb; }
+    input[type="search"]:disabled { background: #f1f5f9; color: #94a3b8; }
+    button { width: 100%; padding: 10px; margin-top: 12px; background: #2563eb; color: #fff; border: 0; border-radius: 6px; font-size: 14px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    #status { margin-top: 8px; font-size: 12px; color: #64748b; min-height: 16px; word-break: break-word; }
+    .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; margin-top: 4px; }
+    .preset-grid label { display: flex; align-items: center; gap: 6px; margin: 0; padding: 4px 6px; border-radius: 4px; font-size: 12px; color: #1e293b; cursor: pointer; }
+    .preset-grid label:hover { background: #f1f5f9; }
+    .preset-grid input { margin: 0; accent-color: #2563eb; }
+    .hint { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .combobox { position: relative; }
+    .results { list-style: none; margin: 4px 0 0; padding: 4px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; max-height: 220px; overflow-y: auto; position: absolute; left: 0; right: 0; z-index: 10; box-shadow: 0 8px 20px rgba(15,23,42,0.14); }
+    .results[hidden] { display: none; }
+    .result { padding: 6px 8px; border-radius: 4px; cursor: pointer; }
+    .result + .result { margin-top: 2px; }
+    .result.active { background: #eff6ff; }
+    .result[aria-selected="true"] { background: #dbeafe; }
+    .result.empty { color: #94a3b8; cursor: default; text-align: center; padding: 8px; }
+    .result-name { font-size: 13px; color: #1e293b; }
+    .result-passport { font-size: 12px; color: #64748b; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+    .result-passport mark { background: #fde68a; color: inherit; padding: 0 1px; border-radius: 2px; }
+    .selected { margin-top: 6px; font-size: 12px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 6px 8px; word-break: break-word; }
+    .selected[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Sticker Visa Auto-Filler</h1>
+
+  <label for="client-search">Search clients</label>
+  <div class="combobox" id="client-combobox">
+    <input type="search" id="client-search" placeholder="Passport / name / email"
+           autocomplete="off" role="combobox" aria-expanded="false"
+           aria-controls="client-results" aria-autocomplete="list" disabled>
+    <ul id="client-results" class="results" role="listbox" aria-label="Matching clients" hidden></ul>
+  </div>
+  <div id="client-selected" class="selected" hidden></div>
+
+  <label>Visa-type preset <span class="hint">— overrides client value</span></label>
+  <div class="preset-grid" id="preset-grid">
+    <label><input type="radio" name="visa_preset" value="" checked> Use client default</label>
+    <label><input type="radio" name="visa_preset" value="tourist"> Tourist</label>
+    <label><input type="radio" name="visa_preset" value="business"> Business</label>
+    <label><input type="radio" name="visa_preset" value="student"> Student</label>
+    <label><input type="radio" name="visa_preset" value="work"> Work</label>
+  </div>
+
+  <button id="autofill-btn" disabled>Autofill Active Form</button>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

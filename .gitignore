@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local env / secrets (keep real keys out of git)
+.env
+.env.local
+*.local
+
+# Claude Code local settings
+.claude/settings.local.json

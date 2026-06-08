@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sticker Visa Auto-Filler — Google-Forms-Style Sandbox</title>
+  <style>
+    body { font-family: 'Google Sans', Roboto, system-ui, sans-serif; max-width: 640px; margin: 24px auto; padding: 0 16px; color: #202124; background: #f0ebf8; }
+    .form-card { background: #fff; border: 1px solid #dadce0; border-radius: 8px; padding: 24px; margin-bottom: 12px; }
+    h1 { font-size: 24px; margin: 0 0 8px; }
+    p.lead { color: #5f6368; font-size: 13px; margin-top: 0; }
+    [role="listitem"] { padding: 12px 0; }
+    [role="heading"] { font-size: 14px; color: #202124; margin-bottom: 8px; font-weight: 400; }
+    .required { color: #d93025; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"] {
+      width: 100%; padding: 6px 0; border: 0; border-bottom: 1px solid #dadce0;
+      font-size: 14px; background: transparent; outline: none;
+    }
+    input:focus, [contenteditable]:focus { border-bottom: 2px solid #673ab7; }
+    [contenteditable] {
+      min-height: 24px; padding: 6px 0; border-bottom: 1px solid #dadce0; font-size: 14px; outline: none;
+    }
+    #log { background: #202124; color: #e8eaed; font-family: ui-monospace, monospace; font-size: 12px; padding: 12px; border-radius: 8px; min-height: 60px; white-space: pre-wrap; }
+    button { padding: 10px 24px; border: 0; border-radius: 4px; background: #673ab7; color: #fff; font-size: 14px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="form-card">
+    <h1>Visa Application (Google-Forms-Style)</h1>
+    <p class="lead">
+      Mimics a real Google Form: each question lives in a <code>div[role="listitem"]</code>
+      container with the prompt in a sibling <code>div[role="heading"]</code>. Inputs
+      carry no <code>id</code>, <code>name</code>, or <code>placeholder</code>, forcing the
+      auto-filler to resolve labels via <code>aria-labelledby</code>, <code>aria-label</code>,
+      or the heading-walk fallback. One field uses <code>contenteditable</code>. A hidden
+      CSRF token at the bottom verifies the EC-01 guardrail still holds.
+    </p>
+  </div>
+
+  <form class="form-card" id="visa-form" autocomplete="off">
+    <div role="listitem">
+      <div role="heading" id="q-passport">Passport Number <span class="required">*</span></div>
+      <input type="text" aria-labelledby="q-passport">
+    </div>
+
+    <div role="listitem">
+      <div role="heading">Family Name (Surname)</div>
+      <input type="text">
+    </div>
+
+    <div role="listitem">
+      <div role="heading">Given Name</div>
+      <input type="text" aria-label="Given Name">
+    </div>
+
+    <div role="listitem">
+      <div role="heading">Date of Birth</div>
+      <input type="date">
+    </div>
+
+    <div role="listitem">
+      <div role="heading">Nationality</div>
+      <div role="textbox" contenteditable="true" data-test="nationality-editor"></div>
+    </div>
+
+    <div role="listitem">
+      <div role="heading">Email Address</div>
+      <input type="email">
+    </div>
+
+    <div role="listitem">
+      <div role="heading">Mobile Number</div>
+      <input type="tel">
+    </div>
+
+    <!-- EC-01: hidden CSRF token must remain untouched. -->
+    <input type="hidden" id="csrf_token" name="csrf_token" value="DO_NOT_OVERWRITE_ME">
+
+    <button type="button" id="dump-btn" style="margin-top:16px;">Dump Current Values</button>
+  </form>
+
+  <h2 style="font-size:13px;margin: 20px 0 8px;">Form state</h2>
+  <pre id="log">(click "Dump Current Values" after the extension runs)</pre>
+
+  <script>
+    document.getElementById('dump-btn').addEventListener('click', () => {
+      const data = {};
+      document.querySelectorAll('[role="listitem"]').forEach((item) => {
+        const heading = item.querySelector('[role="heading"]')?.textContent?.replace(/\*/g, '').trim() || '(unlabeled)';
+        const field = item.querySelector('input, [contenteditable]');
+        if (!field) return;
+        data[heading] = field.isContentEditable ? field.textContent : field.value;
+      });
+      data['csrf_token (hidden)'] = document.getElementById('csrf_token').value;
+      document.getElementById('log').textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>
