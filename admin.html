@@ -6,54 +6,103 @@
   <title>Sticker Visa · Client Database Admin</title>
   <style>
     :root {
-      --bd:#e2e8f0; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b; --soft:#94a3b8;
-      --brand:#4f46e5; --brand-d:#4338ca; --red:#dc2626; --green:#16a34a; --amber:#b45309;
-      --shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.06);
+      --bd:#e5e9f0; --bg:#f4f6fb; --panel:#ffffff; --ink:#0f172a; --muted:#64748b; --soft:#94a3b8;
+      --brand:#4f46e5; --brand-d:#4338ca; --brand-ring: rgba(79,70,229,.16);
+      --red:#dc2626; --green:#16a34a; --amber:#b45309;
+      --radius:14px; --radius-sm:9px;
+      --shadow: 0 1px 2px rgba(15,23,42,.05), 0 8px 24px -8px rgba(15,23,42,.12);
+      --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
     }
     * { box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; margin: 0; padding-bottom: 64px; color: var(--ink); background: var(--bg); }
-    header { background: linear-gradient(120deg, #1e1b4b, #4f46e5); color: #eef2ff; padding: 22px 24px; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      margin: 0; padding-bottom: 72px; color: var(--ink); background: var(--bg);
+      -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; line-height: 1.45;
+    }
+
+    header { background: linear-gradient(125deg, #1e1b4b 0%, #4338ca 55%, #6366f1 100%); color: #eef2ff; padding: 30px 24px 44px; }
     header .wrap { max-width: 1180px; margin: 0 auto; }
-    header h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; }
-    header p { font-size: 13px; margin: 6px 0 0; color: #c7d2fe; }
+    header h1 { font-size: 21px; margin: 0; letter-spacing: -.02em; font-weight: 650; }
+    header p { font-size: 13px; margin: 7px 0 0; color: #c7d2fe; max-width: 760px; line-height: 1.55; }
+
     main { max-width: 1180px; margin: -28px auto 0; padding: 0 24px; }
-    .card { background: #fff; border: 1px solid var(--bd); border-radius: 14px; padding: 20px; margin-bottom: 18px; box-shadow: var(--shadow); }
-    .card h2 { font-size: 14px; margin: 0 0 14px; letter-spacing: .02em; text-transform: uppercase; color: #475569; }
-    .group-title { font-size: 12px; font-weight: 600; color: var(--brand); margin: 16px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--bd); }
+
+    .card {
+      background: var(--panel); border: 1px solid var(--bd); border-radius: var(--radius);
+      padding: 22px; margin-bottom: 18px; box-shadow: var(--shadow);
+    }
+    .card h2 {
+      font-size: 12px; margin: 0 0 16px; letter-spacing: .06em; text-transform: uppercase;
+      color: #64748b; font-weight: 600;
+    }
+
+    .group-title { font-size: 12px; font-weight: 600; color: var(--brand); margin: 22px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--bd); letter-spacing: .01em; }
     .group-title:first-of-type { margin-top: 0; }
-    label { display: block; font-size: 12px; color: var(--muted); margin: 8px 0 3px; }
-    input, select { width: 100%; padding: 8px 10px; border: 1px solid var(--bd); border-radius: 8px; font-size: 13px; background: #fff; transition: border-color .12s, box-shadow .12s; }
-    input:focus, select:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 16px; }
-    .conn-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 12px; align-items: end; }
-    button { padding: 9px 16px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--brand); color: #fff; transition: filter .12s, background .12s; }
-    button:hover { filter: brightness(1.06); }
-    button:active { filter: brightness(.96); }
-    button:disabled { opacity: .55; cursor: not-allowed; }
-    button.secondary { background: #eef2f7; color: var(--ink); }
-    button.danger { background: #fef2f2; color: var(--red); }
-    button.danger:hover { background: var(--red); color: #fff; }
-    button.small { padding: 5px 11px; font-size: 12px; }
-    .actions { display: flex; gap: 10px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
-    .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-    .toolbar input[type="search"] { max-width: 280px; }
+
+    label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; font-weight: 500; }
+    input, select {
+      width: 100%; padding: 9px 11px; border: 1px solid var(--bd); border-radius: var(--radius-sm);
+      font-size: 13px; font-family: inherit; color: var(--ink); background: #fff;
+      transition: border-color .14s, box-shadow .14s;
+    }
+    input::placeholder { color: var(--soft); }
+    input:hover, select:hover { border-color: #cbd2de; }
+    input:focus, select:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-ring); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 18px; }
+    .conn-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 14px; align-items: end; }
+    .conn-row > div:last-child button { width: 100%; }
+
+    button {
+      padding: 9px 17px; border: 1px solid transparent; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 550; font-family: inherit; cursor: pointer;
+      background: var(--brand); color: #fff; box-shadow: var(--shadow-sm);
+      transition: background .14s, box-shadow .14s, transform .06s, border-color .14s, color .14s;
+    }
+    button:hover { background: var(--brand-d); }
+    button:active { transform: translateY(1px); }
+    button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--brand-ring); }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    button.secondary { background: #fff; color: var(--ink); border-color: var(--bd); box-shadow: none; }
+    button.secondary:hover { background: #f1f5f9; border-color: #cbd2de; }
+    button.danger { background: #fff; color: var(--red); border-color: #fecaca; box-shadow: none; }
+    button.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+    button.small { padding: 5px 11px; font-size: 12px; font-weight: 500; }
+
+    .actions { display: flex; gap: 10px; margin-top: 20px; align-items: center; flex-wrap: wrap; }
+    .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+    .toolbar input[type="search"] { max-width: 280px; flex: 1 1 200px; }
+
     .status { font-size: 12px; color: var(--muted); min-height: 16px; }
     .status.ok { color: var(--green); } .status.err { color: var(--red); }
-    .note { font-size: 12px; color: #713f12; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; margin-top: 12px; line-height: 1.5; }
+
+    .note { font-size: 12px; color: #713f12; background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 11px 13px; margin-top: 14px; line-height: 1.6; }
     .note code { background: #fff7ed; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
-    .table-wrap { overflow: auto; border: 1px solid var(--bd); border-radius: 10px; max-height: 60vh; }
+
+    .table-wrap { overflow: auto; border: 1px solid var(--bd); border-radius: var(--radius-sm); max-height: 60vh; }
     table { border-collapse: collapse; width: 100%; font-size: 12px; white-space: nowrap; }
-    th, td { padding: 8px 11px; border-bottom: 1px solid #eef2f6; text-align: left; }
-    th { background: #f1f5f9; position: sticky; top: 0; font-weight: 600; color: #475569; z-index: 1; }
+    th, td { padding: 9px 12px; border-bottom: 1px solid #eef2f6; text-align: left; }
+    th { background: #f1f5f9; position: sticky; top: 0; font-weight: 600; color: #475569; z-index: 1; letter-spacing: .02em; }
     tbody tr:nth-child(even) td { background: #fbfcfe; }
     tbody tr:hover td { background: #eef2ff; }
+    tbody tr:last-child td { border-bottom: 0; }
     td.cell { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
     .row-actions { display: flex; gap: 6px; }
+
     .count { font-size: 12px; color: var(--muted); margin-left: auto; font-weight: 400; text-transform: none; letter-spacing: 0; }
-    .editing-banner { display: none; background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; font-size: 12px; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; }
+    .editing-banner { display: none; background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; font-size: 12px; padding: 9px 13px; border-radius: var(--radius-sm); margin-bottom: 14px; line-height: 1.5; }
     .editing-banner.on { display: block; }
     .pill { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: #eef2ff; color: var(--brand); }
-    .empty { padding: 28px; text-align: center; color: var(--soft); font-size: 13px; }
+    .empty { padding: 32px; text-align: center; color: var(--soft); font-size: 13px; }
+
+    @media (max-width: 760px) {
+      header { padding: 24px 18px 40px; }
+      main { padding: 0 16px; }
+      .card { padding: 18px; }
+      .conn-row { grid-template-columns: 1fr; align-items: stretch; }
+      .grid { grid-template-columns: 1fr; }
+      .toolbar input[type="search"] { max-width: none; }
+    }
   </style>
 </head>
 <body>
@@ -81,8 +130,9 @@
       </div>
       <div class="status" id="conn-status" style="margin-top:12px;"></div>
       <div class="note">
-        The bundled <b>anon</b> key has read + write access here (an anon write policy is enabled on the table). If you tighten RLS later, writes will return HTTP&nbsp;401/403 — swap in your
-        <b>service_role</b> key (Supabase → Settings → API), kept on this machine only.
+        The bundled <b>anon</b> key can <b>read</b> immediately. <b>Writing</b> (insert / edit / delete) needs an anon write policy on the table —
+        run <code>supabase_enable_anon_write.sql</code> once in the Supabase SQL editor — or swap in your <b>service_role</b> key
+        (Supabase → Settings → API), kept on this machine only. Until then, writes return HTTP&nbsp;401 with a row-level-security error.
       </div>
     </section>
 
